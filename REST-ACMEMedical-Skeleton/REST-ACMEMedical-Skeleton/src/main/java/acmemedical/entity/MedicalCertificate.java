@@ -7,14 +7,7 @@
 package acmemedical.entity;
 
 import java.io.Serializable;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 
 @SuppressWarnings("unused")
 
@@ -25,21 +18,28 @@ import jakarta.persistence.Column;
 //TODO MC02 - Do we need a mapped super class?  If so, which one?
 @Entity
 @Table(name = "medical_certificate")
+@NamedQuery(
+    name = MedicalCertificate.FIND_BY_ID_QUERY,
+    query = "SELECT mc FROM MedicalCertificate mc WHERE mc.id = :param1"
+)
 public class MedicalCertificate extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
+	public static final String FIND_BY_ID_QUERY = "MedicalCertificate.findById";
+
 	// TODO MC03 - Add annotations for 1:1 mapping.  What should be the cascade and fetch types?
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    	@JoinColumn(name = "training_id")
+    	@JoinColumn(name = "training_id", referencedColumnName = "id", nullable = false)
 	private MedicalTraining medicalTraining;
 
 	// TODO MC04 - Add annotations for M:1 mapping.  What should be the cascade and fetch types?
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    	@JoinColumn(name = "physician_id")
+    	@JoinColumn(name = "physician_id", referencedColumnName = "id", nullable = false)
 	private Physician owner;
 
 	// TODO MC05 - Add annotations.
-	@Column(name = "signed")
+	@Column(name = "signed", nullable = false)
+    	@Basic(optional = false)
 	private byte signed;
 
 	public MedicalCertificate() {
