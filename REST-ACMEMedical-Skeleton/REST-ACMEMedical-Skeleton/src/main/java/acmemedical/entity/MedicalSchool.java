@@ -10,6 +10,18 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * The persistent class for the medical_school database table.
@@ -18,18 +30,29 @@ import java.util.Set;
 //TODO MS02 - MedicalSchool has subclasses PublicSchool and PrivateSchool.  Look at Week 9 slides for InheritanceType.
 //TODO MS03 - Do we need a mapped super class?  If so, which one?
 //TODO MS04 - Add in JSON annotations to indicate different sub-classes of MedicalSchool
+@Entity
+@Table(name = "medical_school")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE) 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "entity-type") 
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PublicSchool.class, name = "public_school"),
+    @JsonSubTypes.Type(value = PrivateSchool.class, name = "private_school")
+})
 public abstract class MedicalSchool extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// TODO MS05 - Add the missing annotations.
+	@Column(name = "name", nullable = false, unique = true)
 	private String name;
 
 	// TODO MS06 - Add the 1:M annotation.  What should be the cascade and fetch types?
 	private Set<MedicalTraining> medicalTrainings = new HashSet<>();
 
 	// TODO MS07 - Add missing annotation.
+	@OneToMany(mappedBy = "school", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private boolean isPublic;
 
+	@Column(name = "public")
 	public MedicalSchool() {
 		super();
 	}
