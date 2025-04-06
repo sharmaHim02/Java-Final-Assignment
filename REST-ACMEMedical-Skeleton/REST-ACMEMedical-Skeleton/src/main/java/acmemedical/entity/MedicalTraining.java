@@ -10,8 +10,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import jakarta.persistence.Embedded;
+import jakarta.persistence.*;
 
 @SuppressWarnings("unused")
 
@@ -20,13 +19,23 @@ import jakarta.persistence.Embedded;
  */
 //TODO MT01 - Add the missing annotations.
 //TODO MT02 - Do we need a mapped super class?  If so, which one?
+@Entity
+@Table(name = "medical_training")
+@NamedQueries({
+    @NamedQuery(name = MedicalTraining.FIND_BY_ID, query = "SELECT mt FROM MedicalTraining mt WHERE mt.id = :param1"),
+    @NamedQuery(name = MedicalTraining.ALL_MEDICAL_TRAINING_QUERY_NAME, query = "SELECT mt FROM MedicalTraining mt"),
+    @NamedQuery(name = MedicalTraining.IS_DUPLICATE_TRAINING, query = "SELECT COUNT(mt) FROM MedicalTraining mt WHERE mt.id = :param1")
+})
 public class MedicalTraining extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// TODO MT03 - Add annotations for M:1.  What should be the cascade and fetch types?
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE) // ✅ MT03 - M:1 with MedicalSchool
+   	@JoinColumn(name = "school_id")
 	private MedicalSchool school;
 
 	// TODO MT04 - Add annotations for 1:1.  What should be the cascade and fetch types?
+	@OneToOne(mappedBy = "medicalTraining", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private MedicalCertificate certificate;
 
 	@Embedded
