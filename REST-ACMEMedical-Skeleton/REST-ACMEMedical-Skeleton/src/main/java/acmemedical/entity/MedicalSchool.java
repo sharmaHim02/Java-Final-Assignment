@@ -10,16 +10,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -38,9 +29,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = PublicSchool.class, name = "public_school"),
     @JsonSubTypes.Type(value = PrivateSchool.class, name = "private_school")
 })
+@NamedQueries({
+    @NamedQuery(name = MedicalSchool.IS_DUPLICATE_QUERY_NAME, query = "SELECT COUNT(ms) FROM MedicalSchool ms WHERE ms.name = :param1"),
+    @NamedQuery(name = MedicalSchool.SPECIFIC_MEDICAL_SCHOOL_QUERY_NAME, query = "SELECT DISTINCT ms FROM MedicalSchool ms LEFT JOIN FETCH ms.medicalTrainings WHERE ms.id = :param1"),
+    @NamedQuery(name = MedicalSchool.ALL_MEDICAL_SCHOOLS_QUERY_NAME, query = "SELECT DISTINCT ms FROM MedicalSchool ms LEFT JOIN FETCH ms.medicalTrainings")
+})
 public abstract class MedicalSchool extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
+	public static final String IS_DUPLICATE_QUERY_NAME = "MedicalSchool.isDuplicate";
+    	public static final String SPECIFIC_MEDICAL_SCHOOL_QUERY_NAME = "MedicalSchool.findById";
+    	public static final String ALL_MEDICAL_SCHOOLS_QUERY_NAME = "MedicalSchool.findAll";
+
 	// TODO MS05 - Add the missing annotations.
 	@Column(name = "name", nullable = false, unique = true)
 	private String name;
